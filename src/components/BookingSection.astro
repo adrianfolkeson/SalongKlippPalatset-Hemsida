@@ -1,0 +1,62 @@
+---
+import Container from './Container.astro';
+import Eyebrow from './Eyebrow.astro';
+import FillIn from './FillIn.astro';
+import { salons, site } from '../lib/site';
+
+---
+
+<section id="boka" class="scroll-mt-24 bg-ink py-(--spacing-section) text-surface">
+  <Container class="relative">
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-20">
+      <div>
+        <Eyebrow tone="light" class="mb-5" data-reveal>Boka</Eyebrow>
+        <h2 class="text-h2" data-reveal style="--reveal-delay: 80ms;">Boka din tid</h2>
+        <p class="measure mt-6 text-body-lg text-surface/85" data-reveal style="--reveal-delay: 140ms;">
+          Boka enkelt online, dygnet runt — välj salong och tid som passar dig.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4" data-focus-light data-reveal style="--reveal-delay: 220ms;">
+        {
+          salons.map((salon) => (
+            <a
+              href={salon.bookingUrl.value}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group flex items-center justify-between gap-6 rounded-[var(--radius-lg)] border border-surface/25
+                     px-6 py-6 transition-[border-color,background-color] duration-500
+                     [transition-timing-function:var(--ease-calm)] hover:border-surface/70 hover:bg-surface/5"
+            >
+              <span>
+                <span class="block text-eyebrow font-medium uppercase tracking-[0.14em] text-surface/70">
+                  Boka tid
+                </span>
+                <span class="mt-1 block font-display text-[1.75rem] font-semibold leading-none">
+                  {salon.name}
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="text-[1.5rem] transition-transform duration-500 [transition-timing-function:var(--ease-calm)] motion-safe:group-hover:translate-x-1"
+              >
+                →
+              </span>
+              <span class="sr-only">(öppnas i ny flik hos Bokadirekt)</span>
+            </a>
+          ))
+        }
+
+        <p class="text-[0.8125rem] leading-relaxed text-surface/85">
+          <FillIn
+            note={`Bokningssystem — ${site.booking.system.source ?? 'bekräfta'}. Alternativ: Timma (${site.booking.timmaUrl.value})`}
+          >
+            <span>
+              Länkarna går till salongens befintliga bokning hos Bokadirekt — en profil per salong.
+            </span>
+          </FillIn>
+        </p>
+      </div>
+    </div>
+  </Container>
+</section>

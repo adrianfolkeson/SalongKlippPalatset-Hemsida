@@ -1,0 +1,47 @@
+---
+import FillIn from './FillIn.astro';
+import { site } from '../lib/site';
+
+interface Props {
+  tone?: 'default' | 'muted';
+  class?: string;
+}
+
+const { tone = 'default', class: className = '' } = Astro.props;
+
+const links = [
+  { label: site.social.instagramHandle, href: site.social.instagram, name: 'Instagram' },
+  { label: 'Facebook', href: site.social.facebook, name: 'Facebook' },
+  { label: 'TikTok', href: site.social.tiktok, name: 'TikTok' },
+];
+
+const text = tone === 'muted' ? 'text-ink-muted' : 'text-ink';
+---
+
+<ul class={`flex flex-wrap items-center gap-x-6 gap-y-3 ${text} ${className}`}>
+  {
+    links.map((link) => (
+      <li>
+        {link.href.confirmed ? (
+          <a
+            href={link.href.value}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="tap group inline-flex items-center gap-2 text-body hover:text-accent-deep"
+          >
+            <span aria-hidden="true" class="h-px w-5 bg-accent transition-[width] duration-300 group-hover:w-8" />
+            {link.label}
+            <span class="sr-only">(öppnas i ny flik)</span>
+          </a>
+        ) : (
+          <FillIn note={`${link.name}-länk — ${link.href.source ?? 'bekräfta exakt URL'}`}>
+            <span class="inline-flex items-center gap-2 text-body text-ink-muted">
+              <span aria-hidden="true" class="h-px w-5 bg-accent" />
+              {link.label}
+            </span>
+          </FillIn>
+        )}
+      </li>
+    ))
+  }
+</ul>

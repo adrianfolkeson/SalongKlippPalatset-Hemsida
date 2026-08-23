@@ -1,0 +1,38 @@
+---
+import FillIn from './FillIn.astro';
+
+interface Props {
+  name: string;
+  description: string;
+  /** Price stays null until the salon confirms it — never invent one. */
+  price?: string | null;
+  index?: number;
+}
+
+const { name, description, price = null, index = 0 } = Astro.props;
+---
+
+<article
+  class="group relative flex h-full flex-col rounded-[var(--radius-lg)] border border-line bg-surface p-7
+         transition-[transform,border-color,box-shadow] duration-500 [transition-timing-function:var(--ease-calm)]
+         motion-safe:hover:-translate-y-1 hover:border-accent/60 hover:shadow-[0_18px_40px_-28px_rgba(35,32,28,0.35)] sm:p-8"
+  data-reveal
+  style={`--reveal-delay: ${index * 90}ms;`}
+>
+  <span aria-hidden="true" class="hairline-accent w-10 transition-[width] duration-500 group-hover:w-16"></span>
+
+  <h3 class="mt-6 text-h3">{name}</h3>
+  <p class="mt-3 text-body text-ink-muted">{description}</p>
+
+  <p class="mt-6 pt-6 border-t border-line text-eyebrow font-medium uppercase tracking-[0.14em] text-ink">
+    {
+      price ? (
+        <span>{price}</span>
+      ) : (
+        <FillIn kind="fyll-i" note={`Pris för ${name} — hämta från salongens prislista`}>
+          <span class="text-ink-muted">Pris</span>
+        </FillIn>
+      )
+    }
+  </p>
+</article>

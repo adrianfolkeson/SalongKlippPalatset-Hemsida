@@ -1,0 +1,85 @@
+---
+import Container from './Container.astro';
+import Eyebrow from './Eyebrow.astro';
+import { features } from '../lib/site';
+
+interface Props {
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+  /** Tone of the section background. */
+  surface?: 'paper' | 'surface' | 'tint' | 'soft';
+  class?: string;
+  headingLevel?: 2 | 3;
+  /**
+   * Let the scroll backdrop show through this section, under a veil.
+   * 'light' keeps the ivory design; 'dark' keeps the charcoal block.
+   */
+  backdrop?: 'light' | 'dark' | false;
+}
+
+const {
+  id,
+  eyebrow,
+  title,
+  surface = 'paper',
+  class: className = '',
+  headingLevel = 2,
+  backdrop = false,
+} = Astro.props;
+
+const showBackdrop = Boolean(backdrop) && features.scrollBackdrop;
+
+// Veil alphas are the ones measured in scripts/contrast.mjs — changing them
+// means re-running `npm run contrast`.
+const veil =
+  backdrop === 'dark'
+    ? 'linear-gradient(to bottom, rgba(35,32,28,0.95) 0%, rgba(35,32,28,0.30) 12%, rgba(35,32,28,0.22) 50%, rgba(35,32,28,0.30) 88%, rgba(35,32,28,0.95) 100%)'
+    : 'linear-gradient(to bottom, rgba(245,242,236,0.95) 0%, rgba(245,242,236,0.30) 12%, rgba(245,242,236,0.20) 50%, rgba(245,242,236,0.30) 88%, rgba(245,242,236,0.95) 100%)';
+
+const bg = {
+  paper: 'bg-paper',
+  surface: 'bg-surface',
+  tint: 'bg-tint',
+  soft: 'bg-accent-soft/45',
+}[surface];
+
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const sectionBg = showBackdrop ? 'relative isolate bg-transparent' : bg;
+---
+
+<section
+  id={id}
+  class={`scroll-mt-24 border-t border-line/60 py-(--spacing-section) ${sectionBg} ${className}`}
+>
+  {showBackdrop && <div aria-hidden="true" class="absolute inset-0 -z-10" style={`background: ${veil};`} />}
+
+  <Container class="relative">
+    {
+      (eyebrow || title) && (
+        <div class="mb-10 max-w-[46ch] lg:mb-14">
+          {eyebrow && (
+            <Eyebrow tone={showBackdrop && backdrop === 'light' ? 'ink' : 'accent'} class="mb-5" data-reveal>
+              {eyebrow}
+            </Eyebrow>
+          )}
+          {title && (
+            <Heading class="text-h2" data-reveal style="--reveal-delay: 80ms;">
+              {title}
+            </Heading>
+          )}
+          {title && (
+            <span
+              aria-hidden="true"
+              class="hairline-accent mt-6 w-14"
+              data-reveal
+              style="--reveal-delay: 120ms;"
+            />
+          )}
+          <slot name="intro" />
+        </div>
+      )
+    }
+    <slot />
+  </Container>
+</section>

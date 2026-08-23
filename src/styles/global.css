@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Fonts — self-hosted variable subsets (latin only; åäö included)
+   --------------------------------------------------------------- */
+@font-face {
+  font-family: "Cormorant Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("/fonts/cormorant-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Jost Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/jost-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------------------------------------------------------------
+   Design tokens (§3.2 — ivory + refined sage)
+   --------------------------------------------------------------- */
+@theme {
+  --color-paper: #f5f2ec;
+  --color-surface: #fcfaf5;
+  --color-ink: #23201c;
+  --color-ink-muted: #6a655b;
+  --color-accent: #7e8b70;
+  --color-accent-deep: #656f5a;
+  --color-accent-soft: #e9ede3;
+  /* Sage-tinted ivory — a few percent off --paper, used to give the page rhythm.
+     Measured: ink 14.16:1, ink-muted 5.06:1, accent-deep 4.61:1. */
+  --color-tint: #f0f0e8;
+  --color-line: #e4dfd5;
+
+  --font-display: "Cormorant Variable", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Jost Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  --text-display: clamp(2.75rem, 7vw, 5.5rem);
+  --text-display--line-height: 1.02;
+  --text-h1: clamp(2.25rem, 5vw, 3.5rem);
+  --text-h1--line-height: 1.05;
+  --text-h2: clamp(1.75rem, 3.5vw, 2.5rem);
+  --text-h2--line-height: 1.1;
+  --text-h3: 1.5rem;
+  --text-h3--line-height: 1.2;
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.65;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.7;
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1.2;
+
+  --spacing-section: clamp(4.5rem, 8vw, 7.5rem);
+  --container-page: 1200px;
+
+  --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------
+   Base
+   --------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .on-dark :focus-visible,
+  [data-focus-light] :focus-visible {
+    outline-color: var(--color-surface);
+  }
+
+  img { max-width: 100%; height: auto; }
+}
+
+/* ---------------------------------------------------------------
+   Utilities
+   --------------------------------------------------------------- */
+@utility hairline-accent {
+  display: block;
+  height: 1px;
+  background-color: var(--color-accent);
+  border: 0;
+}
+
+@utility hairline {
+  display: block;
+  height: 1px;
+  background-color: var(--color-line);
+  border: 0;
+}
+
+@utility measure {
+  max-width: 66ch;
+}
+
+@utility tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Scroll reveal — opt-in, motion-safe */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 550ms var(--ease-calm),
+    transform 550ms var(--ease-calm);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  [data-reveal],
+  [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* No-JS safety: never hide content if the reveal script never runs */
+.no-js [data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------
+   Scroll backdrop (accent layer — see ScrollBackdrop.astro)
+   --------------------------------------------------------------- */
+#scroll-backdrop .scene {
+  will-change: opacity;
+}
+
+/* Reduced motion: no cross-fade, just the still image for each section. */
+#scroll-backdrop.no-fade .scene {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #scroll-backdrop .scene {
+    transition: none;
+  }
+}

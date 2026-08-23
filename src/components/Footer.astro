@@ -1,0 +1,84 @@
+---
+import Container from './Container.astro';
+import Wordmark from './Wordmark.astro';
+import SocialStrip from './SocialStrip.astro';
+import FillIn from './FillIn.astro';
+import { salons, telHref, nav } from '../lib/site';
+---
+
+<footer id="kontakt" class="scroll-mt-24 border-t border-line bg-surface py-(--spacing-section)">
+  <Container>
+    <div class="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:gap-20">
+      <div>
+        <Wordmark />
+        <p class="measure mt-6 text-body text-ink-muted">
+          Dam- och herrsalong med två salonger — Partille och Mölnlycke.
+        </p>
+        <SocialStrip class="mt-8" tone="muted" />
+      </div>
+
+      <div class="grid gap-10 sm:grid-cols-2">
+        {
+          salons.map((salon) => (
+            <div>
+              <h3 class="font-display text-h3 font-semibold">{salon.name}</h3>
+              <span aria-hidden="true" class="hairline-accent mt-4 w-10" />
+
+              <address class="mt-5 flex flex-col gap-2 text-body not-italic text-ink-muted">
+                <FillIn note={`Adress ${salon.name} — ${salon.street.source ?? 'obekräftad'}`}>
+                  <span>
+                    {salon.street.value}, {salon.postalCode.value} {salon.city}
+                  </span>
+                </FillIn>
+
+                <FillIn note={`Telefon ${salon.name} — ${salon.phone.source ?? 'obekräftad'}`}>
+                  <a class="tap inline-flex items-center hover:text-accent-deep" href={telHref(salon.phone.value)}>
+                    {salon.phone.value}
+                  </a>
+                </FillIn>
+
+                <FillIn kind="fyll-i" note={`Öppettider ${salon.name} — ${salon.hours.source ?? 'saknas'}`}>
+                  <span>Öppettider</span>
+                </FillIn>
+              </address>
+
+              <a
+                href={salon.bookingUrl.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tap mt-5 inline-flex items-center gap-2 text-body text-ink hover:text-accent-deep"
+              >
+                Boka tid
+                <span aria-hidden="true">→</span>
+                <span class="sr-only">i {salon.name} (öppnas i ny flik)</span>
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="mt-16 flex flex-col gap-6 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-[0.8125rem] text-ink-muted">
+        © {new Date().getFullYear()} Salong Klipp Palatset
+      </p>
+
+      <nav aria-label="Sidfotsmeny">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2 text-[0.8125rem] text-ink-muted">
+          {
+            nav.map((item) => (
+              <li>
+                <a href={item.href} class="tap inline-flex items-center hover:text-accent-deep">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a href="#top" class="tap inline-flex items-center hover:text-accent-deep">Till toppen</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </Container>
+</footer>

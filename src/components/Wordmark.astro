@@ -1,0 +1,23 @@
+---
+interface Props {
+  class?: string;
+  /** Rendered as the site name link in the header, plain text elsewhere. */
+  href?: string;
+}
+
+const { class: className = '', href } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag
+  href={href}
+  class={`group inline-flex flex-col leading-none ${href ? 'tap justify-center' : ''} ${className}`}
+>
+  <span class="text-[0.75rem] font-medium uppercase tracking-[0.24em] text-ink-muted transition-colors duration-300 group-hover:text-accent-deep">
+    Salong
+  </span>
+  <span class="font-display text-[1.375rem] font-semibold tracking-[0.01em] sm:text-[1.5rem]">
+    Klipp Palatset
+  </span>
+  {href && <span class="sr-only">— till startsidan</span>}
+</Tag>

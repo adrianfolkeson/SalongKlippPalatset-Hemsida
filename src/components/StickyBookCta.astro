@@ -1,0 +1,55 @@
+---
+import Button from './Button.astro';
+
+/**
+ * Thumb-zone booking CTA on small screens. Appears once the hero is scrolled
+ * past and hides again over the booking section, so it never covers its own
+ * target.
+ */
+---
+
+<div
+  id="sticky-book"
+  data-hidden
+  class="pointer-events-none fixed inset-x-0 bottom-0 z-30 translate-y-4 px-4 pb-4 opacity-0
+         transition-[opacity,transform] duration-500 [transition-timing-function:var(--ease-calm)]
+         data-[visible]:pointer-events-auto data-[visible]:translate-y-0 data-[visible]:opacity-100 lg:hidden"
+  style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));"
+>
+  <div class="rounded-[var(--radius-lg)] border border-line bg-surface/95 p-2 shadow-[0_12px_36px_-20px_rgba(35,32,28,0.5)] backdrop-blur-sm">
+    <Button href="#boka" size="lg" class="w-full">Boka tid</Button>
+  </div>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('#sticky-book');
+  const hero = document.querySelector('main section');
+  const booking = document.querySelector('#boka');
+
+  if (bar && hero) {
+    const state = { pastHero: false, atBooking: false };
+
+    const apply = () => {
+      if (state.pastHero && !state.atBooking) bar.setAttribute('data-visible', '');
+      else bar.removeAttribute('data-visible');
+    };
+
+    new IntersectionObserver(
+      ([entry]) => {
+        state.pastHero = !entry.isIntersecting;
+        apply();
+      },
+      { rootMargin: '-70% 0px 0px 0px' }
+    ).observe(hero);
+
+    if (booking) {
+      new IntersectionObserver(
+        ([entry]) => {
+          state.atBooking = entry.isIntersecting;
+          apply();
+        },
+        { rootMargin: '0px 0px -20% 0px' }
+      ).observe(booking);
+    }
+  }
+</script>

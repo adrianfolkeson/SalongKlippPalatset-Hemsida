@@ -1,0 +1,33 @@
+---
+interface Props {
+  /** Show the sage hairline before the label (§4). */
+  line?: boolean;
+  tone?: 'accent' | 'ink' | 'muted' | 'light';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { line = true, tone = 'accent', class: className = '', ...rest } = Astro.props;
+
+const toneClass = {
+  accent: 'text-accent-deep',
+  ink: 'text-ink',
+  muted: 'text-ink-muted',
+  light: 'text-surface/85',
+}[tone];
+
+const lineClass = {
+  accent: 'bg-accent',
+  ink: 'bg-accent',
+  muted: 'bg-line',
+  light: 'bg-surface/60',
+}[tone];
+---
+
+<p
+  class={`flex items-center gap-3 text-eyebrow font-medium uppercase tracking-[0.14em] ${toneClass} ${className}`}
+  {...rest}
+>
+  {line && <span aria-hidden="true" class={`h-px w-8 shrink-0 sm:w-10 ${lineClass}`}></span>}
+  <span><slot /></span>
+</p>

@@ -1,0 +1,168 @@
+---
+import { Picture } from 'astro:assets';
+import FillIn from './FillIn.astro';
+import { galleryItems } from '../lib/gallery';
+
+interface Props {
+  /** Number of placeholder tiles to show while the real photos are missing. */
+  placeholders?: number;
+}
+
+const { placeholders = 6 } = Astro.props;
+const hasImages = galleryItems.length > 0;
+
+// One aspect for every tile: the photos are shot in different formats, and a
+// uniform crop is what makes them read as one body of work.
+const tile = 'aspect-[4/5]';
+
+// Light, uniform tone treatment so six phone photos look like one set.
+const tone = '[filter:saturate(0.96)_contrast(1.02)]';
+---
+
+{
+  hasImages ? (
+    <>
+      <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-5">
+        {galleryItems.map((item, i) => (
+          <li data-reveal style={`--reveal-delay: ${(i % 3) * 90}ms;`}>
+            <button
+              type="button"
+              class="group block w-full overflow-hidden rounded-[var(--radius-md)] bg-accent-soft"
+              data-lightbox-open
+              data-index={i}
+              aria-label={`Öppna bild ${i + 1} av ${galleryItems.length} i större format`}
+            >
+              <Picture
+                src={item.src}
+                alt={item.alt ?? ''}
+                formats={['avif', 'webp']}
+                widths={[280, 420, 640]}
+                sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 46vw"
+                loading="lazy"
+                decoding="async"
+                class={`h-full w-full object-cover transition-transform duration-700 [transition-timing-function:var(--ease-calm)] motion-safe:group-hover:scale-[1.04] ${tile} ${tone}`}
+              />
+            </button>
+            {item.alt === null && (
+              <p class="mt-2 text-[0.75rem] text-ink-muted">
+                <FillIn kind="fyll-i" note={`Alt-text saknas för ${item.file} — lägg till i src/lib/gallery.ts`}>
+                  <span>Alt-text</span>
+                </FillIn>
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <dialog
+        id="lightbox"
+        class="max-h-[92svh] max-w-[min(96vw,1100px)] rounded-[var(--radius-lg)] bg-surface p-0
+               backdrop:bg-ink/70 backdrop:backdrop-blur-sm"
+        aria-label="Bildvisning"
+      >
+        <div class="relative">
+          <img id="lightbox-image" src="" alt="" class="max-h-[80svh] w-full object-contain" />
+
+          <div class="flex items-center justify-between gap-4 border-t border-line px-4 py-3">
+            <p id="lightbox-counter" class="text-eyebrow uppercase tracking-[0.14em] text-ink-muted" />
+            <div class="flex gap-2">
+              <button type="button" data-lightbox-prev class="tap rounded-[var(--radius-md)] border border-line px-4 hover:border-accent">
+                Föregående
+              </button>
+              <button type="button" data-lightbox-next class="tap rounded-[var(--radius-md)] border border-line px-4 hover:border-accent">
+                Nästa
+              </button>
+              <button type="button" data-lightbox-close class="tap rounded-[var(--radius-md)] bg-ink px-4 text-surface">
+                Stäng
+              </button>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+      <script>
+        const dialog = document.querySelector<HTMLDialogElement>('#lightbox');
+        const img = document.querySelector<HTMLImageElement>('#lightbox-image');
+        const counter = document.querySelector<HTMLElement>('#lightbox-counter');
+        const triggers = [...document.querySelectorAll<HTMLButtonElement>('[data-lightbox-open]')];
+
+        if (dialog && img && counter && triggers.length) {
+          const sources = triggers.map((btn) => {
+            const inner = btn.querySelector('img');
+            return { src: inner?.currentSrc || inner?.src || '', alt: inner?.alt ?? '' };
+          });
+
+          let current = 0;
+          let lastFocused: HTMLElement | null = null;
+
+          const show = (index: number) => {
+            current = (index + sources.length) % sources.length;
+            const inner = triggers[current].querySelector('img');
+            img.src = inner?.currentSrc || sources[current].src;
+            img.alt = sources[current].alt;
+            counter.textContent = `${current + 1} / ${sources.length}`;
+          };
+
+          triggers.forEach((btn, i) =>
+            btn.addEventListener('click', () => {
+              lastFocused = btn;
+              show(i);
+              dialog.showModal();
+            })
+          );
+
+          dialog.querySelector('[data-lightbox-next]')?.addEventListener('click', () => show(current + 1));
+          dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => show(current - 1));
+          dialog.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
+
+          dialog.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') show(current + 1);
+            if (event.key === 'ArrowLeft') show(current - 1);
+          });
+
+          // Click on the backdrop closes.
+          dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) dialog.close();
+          });
+
+          // Swipe between photos on touch devices.
+          let touchX = 0;
+          dialog.addEventListener(
+            'touchstart',
+            (event) => {
+              touchX = event.changedTouches[0].clientX;
+            },
+            { passive: true }
+          );
+          dialog.addEventListener(
+            'touchend',
+            (event) => {
+              const delta = event.changedTouches[0].clientX - touchX;
+              if (Math.abs(delta) > 45) show(delta < 0 ? current + 1 : current - 1);
+            },
+            { passive: true }
+          );
+
+          dialog.addEventListener('close', () => lastFocused?.focus());
+        }
+      </script>
+    </>
+  ) : (
+    <div>
+      <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-5" aria-hidden="true">
+        {Array.from({ length: placeholders }).map((_, i) => (
+          <li
+            class={`rounded-[var(--radius-md)] border border-dashed border-line bg-accent-soft/50 ${tile}`}
+            data-reveal
+            style={`--reveal-delay: ${(i % 3) * 90}ms;`}
+          />
+        ))}
+      </ul>
+      <p class="mt-6 text-body text-ink-muted">
+        <FillIn kind="fyll-i" note="Salongens egna bilder från Instagram — högupplösta original + samtycke för identifierbara kunder">
+          <span>Bilder från salongen läggs in i src/assets/galleri/</span>
+        </FillIn>
+      </p>
+    </div>
+  )
+}

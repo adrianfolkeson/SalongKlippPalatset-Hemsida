@@ -1,0 +1,195 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import SalongCard from '../components/SalongCard.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import ReviewCard from '../components/ReviewCard.astro';
+import BookingSection from '../components/BookingSection.astro';
+import FillIn from '../components/FillIn.astro';
+import Footer from '../components/Footer.astro';
+import StickyBookCta from '../components/StickyBookCta.astro';
+import { Image } from 'astro:assets';
+import ScrollBackdrop from '../components/ScrollBackdrop.astro';
+import { salons, site, features, reviews } from '../lib/site';
+
+/** The salon's own interior photo, picked up automatically when added. */
+const aboutFiles = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/om-oss.{jpg,jpeg,png,webp,avif}',
+  { eager: true }
+);
+const aboutImage = Object.values(aboutFiles)[0]?.default;
+
+/**
+ * Confirmed from the salon's own listings: cutting (dam & herr), colour and
+ * ear piercing. The full list is not public — it stays flagged.
+ */
+const services = [
+  {
+    name: 'Klippning',
+    description:
+      'Dam och herr. Klippning anpassad efter hårtyp, form och hur du vill sköta håret hemma.',
+  },
+  {
+    name: 'Färg & slingor',
+    description: 'Färg, slingor och toning — från diskret uppfräschning till en ny riktning.',
+  },
+  {
+    name: 'Öronhåltagning',
+    description: 'Håltagning med STUDEX, i samma fräscha miljö som allt annat vi gör.',
+  },
+];
+
+---
+
+<Base>
+  <Header slot="header" />
+
+  {features.scrollBackdrop && <ScrollBackdrop />}
+
+  <Hero />
+
+  <!-- Om oss -->
+  <Section id="om-oss" surface="surface">
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-20">
+      <div>
+        <Eyebrow class="mb-5" data-reveal>Om oss</Eyebrow>
+        <h2 class="text-h2" data-reveal style="--reveal-delay: 80ms;">
+          En salong att komma tillbaka till
+        </h2>
+        <span
+          aria-hidden="true"
+          class="hairline-accent mt-6 w-14"
+          data-reveal
+          style="--reveal-delay: 120ms;"
+        />
+
+        <div class="measure mt-7 flex flex-col gap-5 text-body-lg text-ink-muted" data-reveal style="--reveal-delay: 160ms;">
+          <p>
+            <FillIn note="Antal år i branschen — bekräfta årtal och formulering med salongen">
+              <span>Salong Klipp Palatset har funnits i Göteborgstrakten i omkring 25 år.</span>
+            </FillIn>
+          </p>
+          <p>
+            Vi är en dam- och herrsalong som lägger stor vikt vid kvalitet, noggrannhet och en
+            fräsch, välkomnande miljö. Hos oss ska du känna dig väl omhändertagen — oavsett om det
+            är en klippning, en färg eller något helt nytt.
+          </p>
+          <p class="text-body">
+            <FillIn kind="fyll-i" note="Text om teamet — vilka som jobbar i respektive salong">
+              <span>Om teamet</span>
+            </FillIn>
+          </p>
+        </div>
+      </div>
+
+      {
+        aboutImage ? (
+          <div data-reveal style="--reveal-delay: 240ms;">
+            <Image
+              src={aboutImage}
+              alt="Blont, nyfönat hår i mjuka lager i salongen."
+              widths={[480, 720, 1000]}
+              sizes="(min-width: 1024px) 46vw, 92vw"
+              loading="lazy"
+              class="aspect-[4/5] w-full rounded-[var(--radius-lg)] object-cover object-[70%_40%]
+                     shadow-[0_40px_80px_-56px_rgba(35,32,28,0.5)]"
+            />
+          </div>
+        ) : (
+          /* No separate photo needed: the scroll backdrop behind this section
+             is the salon's own image, and it stays crisp beside the panel. */
+          <div aria-hidden="true" class="hidden lg:block" />
+        )
+      }
+    </div>
+  </Section>
+
+  <!-- Tjänster -->
+  <Section id="tjanster" eyebrow="Tjänster" title="Vad vi gör" surface="tint">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      {services.map((service, i) => <ServiceCard {...service} index={i} />)}
+    </div>
+
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-reveal>
+      <p class="text-body text-ink-muted">Boka enkelt online — välj salong och tid.</p>
+      <p class="text-body">
+        <FillIn
+          kind="fyll-i"
+          note="Fullständig tjänstelista — styling, behandlingar, barnklippning m.m. samt priser"
+        >
+          <span class="text-ink-muted">Fler tjänster och priser</span>
+        </FillIn>
+      </p>
+    </div>
+  </Section>
+
+  <!-- Galleri -->
+  <Section id="galleri" eyebrow="Galleri" title="Vårt arbete" surface="paper">
+    <GalleryGrid />
+
+    <p class="mt-10 text-body" data-reveal>
+      <a
+        href={site.social.instagram.value}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="tap group inline-flex items-center gap-3 text-ink hover:text-accent-deep"
+      >
+        <span aria-hidden="true" class="h-px w-8 bg-accent transition-[width] duration-500 group-hover:w-12"></span>
+        Mer på Instagram {site.social.instagramHandle}
+        <span class="sr-only">(öppnas i ny flik)</span>
+      </a>
+    </p>
+  </Section>
+
+  <!-- Våra salonger (signatursektion) -->
+  <Section id="salonger" eyebrow="Salonger" title="Två salonger, samma omsorg" surface="tint">
+    <p slot="intro" class="measure mt-6 text-body-lg text-ink-muted" data-reveal style="--reveal-delay: 140ms;">
+      Samma hantverk och samma omsorg i både Partille och Mölnlycke — välj den salong som passar
+      dig bäst.
+    </p>
+
+    <div class="grid gap-5 lg:grid-cols-2 lg:gap-6">
+      {salons.map((salon, i) => <SalongCard salon={salon} index={i} />)}
+    </div>
+  </Section>
+
+  <!-- Omdömen -->
+  <Section id="omdomen" eyebrow="Omdömen" title="Nöjda kunder i 25 år" surface="paper">
+    <p slot="intro" class="mt-6 text-body" data-reveal style="--reveal-delay: 140ms;">
+      <FillIn note="Rubriken bygger på cirka 25 år — bekräfta årtal">
+        <span class="text-ink-muted">Årtal i rubriken</span>
+      </FillIn>
+    </p>
+
+    <div class="grid gap-5 md:grid-cols-2 lg:gap-6">
+      {
+        reviews.map((review, i) => (
+          <ReviewCard
+            quote={review.quote}
+            name={review.name}
+            rating={review.rating}
+            source={review.source}
+            salon={review.salon}
+            confirmed={review.confirmed}
+            index={i}
+          />
+        ))
+      }
+    </div>
+
+    <p class="mt-10 text-body text-ink-muted" data-reveal>
+      Publicerade omdömen från Bokadirekt och Google.
+    </p>
+  </Section>
+
+  <!-- Boka tid -->
+  <BookingSection />
+
+  <!-- Kontakt -->
+  <Footer slot="footer" />
+  <StickyBookCta slot="footer" />
+</Base>

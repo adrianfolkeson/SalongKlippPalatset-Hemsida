@@ -1,0 +1,18 @@
+---
+interface Props {
+  as?: string;
+  class?: string;
+  width?: 'default' | 'narrow';
+  [key: string]: unknown;
+}
+
+const { as = 'div', class: className = '', width = 'default', ...rest }: Props = Astro.props;
+
+// Dynamic tag name — Astro cannot type-check an arbitrary element here.
+const Tag = as as any;
+const max = width === 'narrow' ? 'max-w-[900px]' : 'max-w-[var(--container-page)]';
+---
+
+<Tag class={`mx-auto w-full ${max} px-6 sm:px-8 lg:px-10 ${className}`} {...rest}>
+  <slot />
+</Tag>

@@ -1,0 +1,40 @@
+---
+import FillIn from './FillIn.astro';
+
+interface Props {
+  tone?: 'light' | 'dark';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { tone = 'dark', class: className = '', ...rest } = Astro.props;
+
+/** All four claims come from public listings — unconfirmed until the salon says so. */
+const items = [
+  { label: '~25 år', note: 'salongen anger cirka 25 år — bekräfta årtal' },
+  { label: 'Dam & herr', note: null },
+  { label: 'Två salonger', note: null },
+  { label: '100% rekommenderar', note: 'siffra från Facebook — bekräfta att den får användas' },
+];
+
+const text = tone === 'light' ? 'text-surface' : 'text-ink';
+const divider = tone === 'light' ? 'bg-surface/40' : 'bg-line';
+---
+
+<ul
+  class={`flex flex-wrap items-center gap-x-5 gap-y-3 text-eyebrow font-medium uppercase tracking-[0.14em] ${text} ${className}`}
+  {...rest}
+>
+  {
+    items.map((item, i) => (
+      <li class="flex items-center gap-x-5">
+        {i > 0 && <span aria-hidden="true" class={`hidden h-3 w-px sm:block ${divider}`} />}
+        {item.note ? (
+          <FillIn note={item.note}>{item.label}</FillIn>
+        ) : (
+          <span>{item.label}</span>
+        )}
+      </li>
+    ))
+  }
+</ul>

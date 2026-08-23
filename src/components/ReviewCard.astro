@@ -1,0 +1,59 @@
+---
+import FillIn from './FillIn.astro';
+
+interface Props {
+  quote: string;
+  name: string;
+  /** 1–5. Only rendered when the review is confirmed. */
+  rating?: number | null;
+  source?: string;
+  salon?: string;
+  confirmed?: boolean;
+  index?: number;
+}
+
+const { quote, name, rating = null, source, salon, confirmed = false, index = 0 } = Astro.props;
+---
+
+<figure
+  class="flex h-full flex-col rounded-[var(--radius-lg)] border border-line bg-surface p-7 sm:p-8"
+  data-reveal
+  style={`--reveal-delay: ${index * 90}ms;`}
+>
+  {
+    rating !== null && confirmed && (
+      <p class="mb-5 flex gap-1 text-accent-deep">
+        <span class="sr-only">{rating} av 5 i betyg</span>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span aria-hidden="true" class={i < rating ? 'opacity-100' : 'opacity-25'}>
+            ★
+          </span>
+        ))}
+      </p>
+    )
+  }
+
+  <blockquote class="font-display text-[1.375rem] font-medium leading-[1.45] text-ink">
+    <p>„{quote}”</p>
+  </blockquote>
+
+  <figcaption class="mt-auto pt-6 text-eyebrow font-medium uppercase tracking-[0.14em] text-ink-muted">
+    {
+      confirmed ? (
+        <span>
+          {name}
+          {(salon || source) && (
+            <span class="text-ink-muted/80">
+              {' · '}
+              {[salon, source].filter(Boolean).join(' · ')}
+            </span>
+          )}
+        </span>
+      ) : (
+        <FillIn kind="fyll-i" note="Riktigt omdöme från Bokadirekt/Google/Facebook — med kundens lov">
+          <span>{name}</span>
+        </FillIn>
+      )
+    }
+  </figcaption>
+</figure>

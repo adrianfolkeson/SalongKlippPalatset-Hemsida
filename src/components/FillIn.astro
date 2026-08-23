@@ -1,0 +1,30 @@
+---
+/**
+ * Marks data that is NOT confirmed by the salon. Renders visibly so nothing
+ * unverified can ever be mistaken for fact. Never remove the marker without a
+ * confirmation from the client.
+ */
+interface Props {
+  /** BEKRÄFTA = value exists but is unverified. FYLL I = value is missing. */
+  kind?: 'bekrafta' | 'fyll-i';
+  /** What needs confirming — shown in the tooltip/aria description. */
+  note?: string;
+  class?: string;
+}
+
+const { kind = 'bekrafta', note, class: className = '' } = Astro.props;
+const label = kind === 'fyll-i' ? 'FYLL I' : 'BEKRÄFTA';
+const title = note ? `${label}: ${note}` : `${label} med salongen innan lansering`;
+---
+
+<span class={`inline-flex flex-wrap items-baseline gap-x-2 gap-y-1 ${className}`}>
+  <slot />
+  <span
+    class="inline-flex items-center rounded-[var(--radius-sm)] border border-dashed border-accent
+           bg-accent-soft px-1.5 py-0.5 align-middle font-sans text-[0.75rem] font-medium
+           uppercase tracking-[0.12em] text-ink"
+    title={title}
+  >
+    <span class="sr-only">Ej bekräftad uppgift: </span>[{label}]
+  </span>
+</span>

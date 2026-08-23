@@ -1,0 +1,44 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost-light';
+  size?: 'md' | 'lg';
+  external?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  external = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const base =
+  'tap inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-medium ' +
+  'tracking-[0.02em] transition-[background-color,color,border-color,transform] duration-300 ' +
+  '[transition-timing-function:var(--ease-calm)] motion-safe:hover:-translate-y-px';
+
+const variants = {
+  // Primary CTA is always charcoal-filled with white text (§3.2).
+  primary: 'bg-ink text-surface hover:bg-[#332f29]',
+  secondary: 'border border-ink/70 text-ink hover:bg-ink hover:text-surface',
+  'ghost-light': 'border border-surface/70 text-surface hover:bg-surface hover:text-ink',
+};
+
+const sizes = {
+  md: 'px-6 py-3 text-[0.9375rem]',
+  lg: 'px-8 py-4 text-base',
+};
+
+const cls = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag class={cls} href={href} {...externalAttrs} {...rest}>
+  <slot />
+</Tag>

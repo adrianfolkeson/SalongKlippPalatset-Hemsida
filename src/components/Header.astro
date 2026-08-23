@@ -1,0 +1,166 @@
+---
+import Container from './Container.astro';
+import Wordmark from './Wordmark.astro';
+import Button from './Button.astro';
+import { nav, salons } from '../lib/site';
+---
+
+<div id="top-sentinel" aria-hidden="true" class="absolute top-0 h-px w-full"></div>
+
+<header
+  id="site-header"
+  data-header
+  class="fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[background-color,border-color,box-shadow]
+         duration-500 [transition-timing-function:var(--ease-calm)]
+         data-[scrolled]:border-line data-[scrolled]:bg-paper/95 data-[scrolled]:backdrop-blur-sm"
+  style="padding-top: env(safe-area-inset-top);"
+>
+  <Container class="flex h-[4.5rem] items-center justify-between gap-6 sm:h-20">
+    <Wordmark href="/" />
+
+    <nav aria-label="Huvudmeny" class="hidden lg:block">
+      <ul class="flex items-center gap-8">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="group relative inline-flex py-2 text-[0.9375rem] text-ink transition-colors duration-300 hover:text-accent-deep"
+              >
+                {item.label}
+                <span
+                  aria-hidden="true"
+                  class="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-accent transition-transform
+                         duration-300 [transition-timing-function:var(--ease-calm)] group-hover:scale-x-100"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <Button href="#boka">Boka tid</Button>
+
+      <button
+        type="button"
+        id="menu-toggle"
+        class="tap -mr-2 inline-flex items-center justify-center rounded-[var(--radius-sm)] px-2 lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <span class="sr-only">Öppna meny</span>
+        <span aria-hidden="true" class="flex w-6 flex-col items-end gap-[5px]">
+          <span data-bar class="h-px w-6 bg-ink transition-transform duration-300"></span>
+          <span data-bar class="h-px w-4 bg-ink transition-[width,opacity] duration-300"></span>
+          <span data-bar class="h-px w-6 bg-ink transition-transform duration-300"></span>
+        </span>
+      </button>
+    </div>
+  </Container>
+</header>
+
+<!-- Mobile menu: full-screen overlay, CTA stays visible (§4) -->
+<div
+  id="mobile-menu"
+  hidden
+  class="fixed inset-0 z-40 bg-paper lg:hidden"
+  style="padding-top: calc(4.5rem + env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom);"
+>
+  <Container class="flex h-full flex-col justify-between overflow-y-auto py-8">
+    <nav aria-label="Meny">
+      <ul class="flex flex-col gap-1">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                data-menu-link
+                class="tap flex items-center border-b border-line py-4 font-display text-[1.75rem] font-semibold text-ink"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mt-10 flex flex-col gap-4 pb-6">
+      <Button href="#boka" size="lg" data-menu-link>Boka tid</Button>
+      <ul class="flex flex-col gap-1 text-body text-ink-muted">
+        {
+          salons.map((salon) => (
+            <li>
+              <a
+                href={`#salong-${salon.id}`}
+                data-menu-link
+                class="tap inline-flex items-center gap-2 hover:text-accent-deep"
+              >
+                <span aria-hidden="true" class="h-px w-5 bg-accent" />
+                {salon.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Container>
+</div>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const sentinel = document.querySelector('#top-sentinel');
+  const toggle = document.querySelector<HTMLButtonElement>('#menu-toggle');
+  const menu = document.querySelector<HTMLElement>('#mobile-menu');
+
+  // Paper background once the page scrolls away from the hero.
+  if (header && sentinel) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) header.removeAttribute('data-scrolled');
+        else header.setAttribute('data-scrolled', '');
+      },
+      { rootMargin: '0px' }
+    );
+    observer.observe(sentinel);
+  }
+
+  if (toggle && menu) {
+    const label = toggle.querySelector('.sr-only');
+    const bars = toggle.querySelectorAll<HTMLElement>('[data-bar]');
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      if (label) label.textContent = open ? 'Stäng meny' : 'Öppna meny';
+      bars[0]?.style.setProperty('transform', open ? 'translateY(6px) rotate(45deg)' : '');
+      bars[1]?.style.setProperty('opacity', open ? '0' : '');
+      bars[2]?.style.setProperty('transform', open ? 'translateY(-6px) rotate(-45deg)' : '');
+      if (open) menu.querySelector<HTMLElement>('[data-menu-link]')?.focus();
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+
+    menu.querySelectorAll('[data-menu-link]').forEach((link) =>
+      link.addEventListener('click', () => {
+        setOpen(false);
+        toggle.focus();
+      })
+    );
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // Reset when resizing up to desktop.
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+</script>

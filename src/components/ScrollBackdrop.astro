@@ -1,0 +1,135 @@
+---
+import { Picture } from 'astro:assets';
+import { scenes } from '../lib/backdrops';
+
+/**
+ * Never upscale: a 558px original blown up to 1920px costs bytes and adds no
+ * detail. Ask the salon for larger originals and these widths grow by
+ * themselves.
+ */
+const widthsFor = (image: ImageMetadata) => {
+  const candidates = [480, 768, 1280, 1920, 2560].filter((w) => w < image.width);
+  return [...candidates, image.width];
+};
+
+/**
+ * Fixed full-bleed image plane behind the page. Sections that opt in
+ * (data-backdrop) go transparent and let it show through under a veil; every
+ * other section keeps its solid background and covers it entirely.
+ *
+ * Turn the whole effect off with features.scrollBackdrop in site.ts — the page
+ * then renders exactly as it did before this layer existed.
+ */
+---
+
+<div
+  id="scroll-backdrop"
+  aria-hidden="true"
+  class="pointer-events-none fixed inset-x-0 top-0 -z-10 bg-paper"
+  style="height: 100vh; height: 100lvh; transform: translateZ(0); backface-visibility: hidden;"
+>
+  {
+    scenes.map((scene) => (
+      <div
+        class="scene absolute inset-0 opacity-0 transition-opacity duration-[750ms] [transition-timing-function:var(--ease-calm)] data-[active]:opacity-100"
+        data-scene={scene.id}
+        data-anchor={scene.anchor}
+        data-active={scene.eager ? '' : undefined}
+        hidden={!scene.eager}
+      >
+        {scene.image ? (
+          <Picture
+            src={scene.image}
+            alt=""
+            formats={['avif', 'webp']}
+            widths={widthsFor(scene.image)}
+            sizes="100vw"
+            loading={scene.eager ? 'eager' : 'lazy'}
+            fetchpriority={scene.eager ? 'high' : 'low'}
+            decoding="async"
+            class="h-full w-full object-cover"
+            style={scene.position ? `object-position: ${scene.position};` : undefined}
+          />
+        ) : (
+          <div class="h-full w-full" style={`background: ${scene.fallback};`} />
+        )}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  const plane = document.querySelector<HTMLElement>('#scroll-backdrop');
+
+  if (plane) {
+    const layers = [...plane.querySelectorAll<HTMLElement>('.scene')];
+    const anchors = layers
+      .map((layer) => ({
+        layer,
+        section: document.getElementById(layer.dataset.anchor ?? ''),
+      }))
+      .filter((entry): entry is { layer: HTMLElement; section: HTMLElement } => Boolean(entry.section));
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const applyMotion = () => {
+      // Reduced motion: no cross-fade at all — each section simply shows its
+      // own still image.
+      plane.classList.toggle('no-fade', reduced.matches);
+    };
+    applyMotion();
+    reduced.addEventListener('change', applyMotion);
+
+    // Reveal (and therefore start loading) a deferred layer shortly before it
+    // is needed. Hidden layers are display:none, so their lazy images are never
+    // fetched on first paint.
+    const preloader = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const match = anchors.find((a) => a.section === entry.target);
+          if (match?.layer.hidden) match.layer.hidden = false;
+        });
+      },
+      { rootMargin: '900px 0px 900px 0px' }
+    );
+    anchors.forEach(({ section }) => preloader.observe(section));
+
+    // The scene whose section is closest to the middle of the viewport wins.
+    let frame = 0;
+    const pickScene = () => {
+      frame = 0;
+      const middle = window.innerHeight / 2;
+      let best: HTMLElement | null = null;
+      let bestDistance = Infinity;
+
+      anchors.forEach(({ layer, section }) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+        const distance = Math.abs(rect.top + rect.height / 2 - middle);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = layer;
+        }
+      });
+
+      if (!best) return; // keep the last scene while opaque sections cover the plane
+      layers.forEach((layer) => {
+        if (layer === best) {
+          layer.hidden = false;
+          layer.setAttribute('data-active', '');
+        } else {
+          layer.removeAttribute('data-active');
+        }
+      });
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(pickScene);
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    schedule();
+  }
+</script>
