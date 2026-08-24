@@ -15,7 +15,18 @@ import { nav, salons } from '../lib/site';
          data-[scrolled]:border-line data-[scrolled]:bg-paper/95 data-[scrolled]:backdrop-blur-sm"
   style="padding-top: env(safe-area-inset-top);"
 >
-  <Container class="flex h-[4.5rem] items-center justify-between gap-6 sm:h-20">
+  <!-- Soft ivory scrim so the wordmark and nav stay legible over a dark hero
+       photo; it fades out once the header takes its own paper background. -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[160%] transition-opacity duration-500
+           [transition-timing-function:var(--ease-calm)] data-[scrolled]:opacity-0"
+    data-scrim
+    style="background: linear-gradient(to bottom, rgba(245,242,236,0.94) 0%, rgba(245,242,236,0.82) 45%, rgba(245,242,236,0.35) 78%, rgba(245,242,236,0) 100%);"
+  >
+  </div>
+
+  <Container class="relative flex h-[4.5rem] items-center justify-between gap-6 sm:h-20">
     <Wordmark href="/" />
 
     <nav aria-label="Huvudmeny" class="hidden lg:block">
@@ -119,8 +130,14 @@ import { nav, salons } from '../lib/site';
   if (header && sentinel) {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) header.removeAttribute('data-scrolled');
-        else header.setAttribute('data-scrolled', '');
+        const scrim = header.querySelector('[data-scrim]');
+        if (entry.isIntersecting) {
+          header.removeAttribute('data-scrolled');
+          scrim?.removeAttribute('data-scrolled');
+        } else {
+          header.setAttribute('data-scrolled', '');
+          scrim?.setAttribute('data-scrolled', '');
+        }
       },
       { rootMargin: '0px' }
     );

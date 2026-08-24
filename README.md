@@ -36,7 +36,7 @@ får gå in i strukturerad data (JSON-LD).
 Bilderna i `src/assets/` är salongens egna. Två av dem visar **identifierbara kunder**
 och kräver dokumenterat samtycke från personen i bild innan sajten publiceras:
 
-- `src/assets/hero.jpg` — blond profilbild, ansiktet delvis synligt (används som hero-bakgrund)
+- `src/assets/hero.jpg` — kunden är fotograferad bakifrån, inget ansikte syns
 - `src/assets/galleri/galleri-06.jpg` — mörkt hår i profil, ansiktet delvis synligt
   (används även som bakgrund i "Om oss": `src/assets/backdrops/om-oss.jpg`)
 
@@ -50,9 +50,10 @@ person i bild är minderårig. Utan samtycke: byt ut de två bilderna innan lans
 
 ### 3. Bildupplösning
 
-Originalen är små (hero: 558×563 px). Det räcker på mobil men skalas upp på stora
-skärmar. Be salongen om högupplösta original — minst 2400 px bredd för hero-bilden —
-så blir bakgrunden skarp på desktop.
+Originalen är små. Hero-bilden levererades i 469×569 px och används som fullbredds­bakgrund,
+så `src/assets/hero.jpg` är en uppskalad kopia (3× med lanczos3 + lätt skärpning) — det ger
+en jämnare bild än när webbläsaren själv sträcker ut originalet, men lägger inte till
+detaljer. Be salongen om högupplösta original, minst 2400 px bredd för hero-bilden.
 
 ### 4. noindex
 

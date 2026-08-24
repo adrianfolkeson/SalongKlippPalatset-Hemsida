@@ -7,10 +7,9 @@ import TrustStrip from './TrustStrip.astro';
 import { salons } from '../lib/site';
 
 /**
- * Split hero: the copy sits on the clean ivory field, the photo is a contained
- * panel beside it. The source is 558px wide — shown at roughly its native size
- * in this column it stays sharp, where a full-bleed crop would both upscale it
- * and cut the composition to a hair close-up.
+ * Full-bleed hero photo with LOCALISED scrims: the copy carries its own
+ * readable surface, and the rest of the photo is left alone. Alphas mirror
+ * scripts/photo-contrast.mjs — change one, re-run `npm run contrast:photos`.
  */
 const heroFiles = import.meta.glob<{ default: ImageMetadata }>(
   '../assets/hero.{jpg,jpeg,png,webp,avif}',
@@ -18,112 +17,125 @@ const heroFiles = import.meta.glob<{ default: ImageMetadata }>(
 );
 const heroImage = Object.values(heroFiles)[0]?.default;
 const heroWidths = heroImage
-  ? [360, 480, 640, 900].filter((w) => w < heroImage.width).concat(heroImage.width)
+  ? [768, 1280, 1920, 2560].filter((w) => w < heroImage.width).concat(heroImage.width)
   : [];
 ---
 
 <section
   id="hero"
-  class="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden bg-paper
-         pb-12 pt-28 sm:pt-32"
-  style="padding-bottom: calc(2.75rem + env(safe-area-inset-bottom));"
+  class="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden bg-accent-soft
+         pt-28 sm:pt-32"
+  style="padding-bottom: calc(3rem + env(safe-area-inset-bottom));"
 >
-  <!-- Quiet tonal field so the ivory never reads as flat white -->
+  <!-- Media -->
+  <div class="absolute inset-0 -z-20">
+    {
+      heroImage ? (
+        <Image
+          src={heroImage}
+          alt=""
+          widths={heroWidths}
+          sizes="100vw"
+          quality={70}
+          loading="eager"
+          fetchpriority="high"
+          class="h-full w-full object-cover object-[52%_8%]"
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          class="h-full w-full"
+          style="background: linear-gradient(160deg, #efece4 0%, #e4e8dd 48%, #d9d4c8 100%);"
+        />
+      )
+    }
+  </div>
+
+  <!-- Mobile: the copy sits on an ivory card, the photo runs free above it -->
   <div
     aria-hidden="true"
-    class="absolute inset-0 -z-10"
+    class="absolute inset-x-0 bottom-0 top-[19%] -z-10 rounded-t-[var(--radius-lg)] border-t border-line/70
+           bg-paper/88 backdrop-blur-[3px] md:hidden"
+  >
+  </div>
+  <div
+    aria-hidden="true"
+    class="absolute inset-x-0 top-[13%] -z-10 h-[6%] md:hidden"
+    style="background: linear-gradient(to bottom, rgba(245,242,236,0) 0%, rgba(245,242,236,0.88) 100%);"
+  >
+  </div>
+
+  <!-- Desktop: side scrim behind the copy column, photo untouched on the right -->
+  <div
+    aria-hidden="true"
+    class="absolute inset-0 -z-10 hidden md:block"
     style="background:
-      radial-gradient(80% 60% at 80% 12%, rgba(233,237,227,0.75) 0%, rgba(233,237,227,0) 60%),
-      radial-gradient(70% 60% at 8% 92%, rgba(228,223,213,0.55) 0%, rgba(228,223,213,0) 60%);"
+      linear-gradient(to right, rgba(245,242,236,0.94) 0%, rgba(245,242,236,0.90) 32%, rgba(245,242,236,0.70) 46%, rgba(245,242,236,0.24) 60%, rgba(245,242,236,0) 70%);"
+  >
+  </div>
+
+  <!-- Desktop: thin bottom band so the TrustStrip stays legible edge to edge -->
+  <div
+    aria-hidden="true"
+    class="absolute inset-x-0 bottom-0 -z-10 hidden h-[34%] md:block"
+    style="background:
+      linear-gradient(to top, rgba(245,242,236,0.92) 0%, rgba(245,242,236,0.88) 55%, rgba(245,242,236,0.35) 85%, rgba(245,242,236,0) 100%);"
   >
   </div>
 
   <Container class="relative">
-    <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.9fr)] lg:gap-14">
-      <!-- Photo: contained, sharp, and never cropped to a close-up -->
-      <div class="order-1 lg:order-2" data-reveal style="--reveal-delay: 120ms;">
+    <div class="max-w-[46rem]">
+      <Eyebrow tone="ink" class="mb-6" data-reveal>Dam &amp; herr · Partille &amp; Mölnlycke</Eyebrow>
+
+      <h1
+        class="font-display text-[clamp(2.5rem,5.4vw,4.75rem)] font-semibold leading-[1.03] text-ink"
+        data-reveal
+        style="--reveal-delay: 80ms;"
+      >
+        Klippning och färg med omsorg.
+      </h1>
+
+      <p
+        class="mt-6 max-w-[42ch] text-body-lg text-ink"
+        data-reveal
+        style="--reveal-delay: 160ms;"
+      >
+        En etablerad dam- och herrsalong med två salonger — klippning, färg och personlig
+        service i en fräsch, trivsam miljö.
+      </p>
+
+      <div
+        class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+        data-reveal
+        style="--reveal-delay: 240ms;"
+      >
+        <Button href="#boka" size="lg">Boka tid</Button>
+        <Button href="#salonger" variant="secondary" size="lg">Våra salonger</Button>
+      </div>
+
+      <!-- Signature: the two salons -->
+      <ul
+        class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2"
+        data-reveal
+        style="--reveal-delay: 320ms;"
+      >
         {
-          heroImage ? (
-            <figure class="relative">
-              <Image
-                src={heroImage}
-                alt="Nyfärgat, blont hår i mjuka lager, sett från sidan i salongen."
-                widths={heroWidths}
-                sizes="(min-width: 1024px) 46vw, 92vw"
-                loading="eager"
-                fetchpriority="high"
-                class="aspect-[4/3] w-full rounded-[var(--radius-lg)] object-cover object-[58%_32%]
-                       shadow-[0_40px_80px_-56px_rgba(35,32,28,0.55)] sm:aspect-[5/4] lg:aspect-[5/6]"
-              />
-              <figcaption
-                class="absolute -bottom-4 left-4 rounded-[var(--radius-md)] border border-line bg-surface/95
-                       px-4 py-2 text-eyebrow font-medium uppercase tracking-[0.14em] text-ink-muted backdrop-blur-[2px] sm:left-6"
+          salons.map((salon, i) => (
+            <li class="flex items-center gap-6">
+              {i > 0 && <span aria-hidden="true" class="h-6 w-px bg-accent" />}
+              <a
+                href={`#salong-${salon.id}`}
+                class="tap inline-flex items-center font-display text-[1.375rem] font-semibold text-ink
+                       transition-colors duration-300 hover:text-accent-deep lg:text-[1.5rem]"
               >
-                Färg &amp; slingor
-              </figcaption>
-            </figure>
-          ) : (
-            <div
-              aria-hidden="true"
-              class="aspect-[4/5] w-full rounded-[var(--radius-lg)] bg-accent-soft"
-            />
-          )
+                {salon.name}
+              </a>
+            </li>
+          ))
         }
-      </div>
-
-      <div class="order-2 lg:order-1">
-        <Eyebrow class="mb-6" data-reveal>Dam &amp; herr · Partille &amp; Mölnlycke</Eyebrow>
-
-        <h1
-          class="font-display text-[clamp(2.5rem,4.6vw,4.25rem)] font-semibold leading-[1.03] text-ink"
-          data-reveal
-          style="--reveal-delay: 80ms;"
-        >
-          Klippning och färg med omsorg.
-        </h1>
-
-        <p
-          class="mt-6 max-w-[46ch] text-body-lg text-ink-muted"
-          data-reveal
-          style="--reveal-delay: 160ms;"
-        >
-          En etablerad dam- och herrsalong med två salonger — klippning, färg och personlig
-          service i en fräsch, trivsam miljö.
-        </p>
-
-        <div
-          class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
-          data-reveal
-          style="--reveal-delay: 240ms;"
-        >
-          <Button href="#boka" size="lg">Boka tid</Button>
-          <Button href="#salonger" variant="secondary" size="lg">Våra salonger</Button>
-        </div>
-
-        <!-- Signature: the two salons -->
-        <ul
-          class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2"
-          data-reveal
-          style="--reveal-delay: 320ms;"
-        >
-          {
-            salons.map((salon, i) => (
-              <li class="flex items-center gap-6">
-                {i > 0 && <span aria-hidden="true" class="h-6 w-px bg-accent" />}
-                <a
-                  href={`#salong-${salon.id}`}
-                  class="tap inline-flex items-center font-display text-[1.375rem] font-semibold text-ink
-                         transition-colors duration-300 hover:text-accent-deep lg:text-[1.5rem]"
-                >
-                  {salon.name}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
+      </ul>
     </div>
 
-    <TrustStrip class="mt-10 lg:mt-12" data-reveal style="--reveal-delay: 400ms;" />
+    <TrustStrip class="mt-12 lg:mt-14" data-reveal style="--reveal-delay: 400ms;" />
   </Container>
 </section>
