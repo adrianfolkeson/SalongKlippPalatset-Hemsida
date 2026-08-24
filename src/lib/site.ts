@@ -173,6 +173,14 @@ export const features = {
    * calm, well-composed originals of at least 1100px (see MIN_BACKDROP_WIDTH).
    */
   scrollBackdrop: false,
+  /**
+   * Show the photo in the hero. The delivered original is 469×569, which only
+   * holds up in the contained frame it is displayed in here. Set to false for a
+   * text-only hero on the calm ivory field — sharp and empty beats large and
+   * soft. Turn the full-bleed treatment back on only with a real high-resolution
+   * original (see README).
+   */
+  heroPhoto: true,
 };
 
 export const nav = [

@@ -11,8 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "contrast": "node scripts/contrast.mjs",
-    "check": "astro check",
-    "contrast:photos": "node scripts/photo-contrast.mjs"
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
