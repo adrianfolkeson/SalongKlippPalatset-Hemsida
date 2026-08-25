@@ -14,7 +14,7 @@ import Footer from '../components/Footer.astro';
 import StickyBookCta from '../components/StickyBookCta.astro';
 import { Image } from 'astro:assets';
 import ScrollBackdrop from '../components/ScrollBackdrop.astro';
-import { salons, site, features, reviews } from '../lib/site';
+import { salons, site, features, reviews, services } from '../lib/site';
 
 /** The salon's own interior photo, picked up automatically when added. */
 const aboutFiles = import.meta.glob<{ default: ImageMetadata }>(
@@ -22,26 +22,6 @@ const aboutFiles = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true }
 );
 const aboutImage = Object.values(aboutFiles)[0]?.default;
-
-/**
- * Confirmed from the salon's own listings: cutting (dam & herr), colour and
- * ear piercing. The full list is not public — it stays flagged.
- */
-const services = [
-  {
-    name: 'Klippning',
-    description:
-      'Dam och herr. Klippning anpassad efter hårtyp, form och hur du vill sköta håret hemma.',
-  },
-  {
-    name: 'Färg & slingor',
-    description: 'Färg, slingor och toning — från diskret uppfräschning till en ny riktning.',
-  },
-  {
-    name: 'Öronhåltagning',
-    description: 'Håltagning med STUDEX, i samma fräscha miljö som allt annat vi gör.',
-  },
-];
 
 ---
 
@@ -111,17 +91,19 @@ const services = [
   <!-- Tjänster -->
   <Section id="tjanster" eyebrow="Tjänster" title="Vad vi gör" surface="tint">
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-      {services.map((service, i) => <ServiceCard {...service} index={i} />)}
+      {services.map((service, i) => <ServiceCard service={service} index={i} />)}
     </div>
 
     <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-reveal>
-      <p class="text-body text-ink-muted">Boka enkelt online — välj salong och tid.</p>
+      <p class="text-body text-ink-muted">
+        Priserna är ordinarie priser. Aktuella kampanjer visas hos Bokadirekt.
+      </p>
       <p class="text-body">
         <FillIn
           kind="fyll-i"
-          note="Fullständig tjänstelista — styling, behandlingar, barnklippning m.m. samt priser"
+          note="Fullständig tjänstelista — styling, behandlingar, barnklippning m.m."
         >
-          <span class="text-ink-muted">Fler tjänster och priser</span>
+          <span class="text-ink-muted">Fler tjänster</span>
         </FillIn>
       </p>
     </div>

@@ -114,6 +114,83 @@ export const site = {
   },
 } as const;
 
+export type Price = {
+  /** Starting price in SEK, or null when the salon has not confirmed one. */
+  from: number | null;
+  confirmed: boolean;
+  source?: string;
+};
+
+export type Service = {
+  id: string;
+  name: string;
+  description: string;
+  /** Prices differ per salon — never copy one salon's price to the other. */
+  prices: Record<Salon['id'], Price>;
+};
+
+/**
+ * ORDINARY prices only.
+ *
+ * Bokadirekt currently shows campaign prices ("Kampanjpris till 31 aug") with the
+ * ordinary price struck through beside them. The ordinary price is what goes on
+ * the site: a campaign price expires and would leave the site quoting a price the
+ * salon no longer honours. Bokadirekt stays the live source for campaigns, which
+ * is why every card links there.
+ */
+export const services: Service[] = [
+  {
+    id: 'klippning',
+    name: 'Klippning',
+    description:
+      'Dam och herr. Klippning anpassad efter hårtyp, form och hur du vill sköta håret hemma.',
+    prices: {
+      partille: { from: null, confirmed: false, source: 'pris ej hämtat än' },
+      molnlycke: { from: null, confirmed: false, source: 'pris ej hämtat än' },
+    },
+  },
+  {
+    id: 'farg-slingor',
+    name: 'Färg & slingor',
+    description: 'Färg, slingor och toning — från diskret uppfräschning till en ny riktning.',
+    prices: {
+      partille: { from: 999, confirmed: true, source: 'Bokadirekt Partille, ordinarie pris' },
+      molnlycke: { from: null, confirmed: false, source: 'pris ej hämtat än' },
+    },
+  },
+  {
+    id: 'oronhaltagning',
+    name: 'Öronhåltagning',
+    description: 'Håltagning med STUDEX, i samma fräscha miljö som allt annat vi gör.',
+    prices: {
+      partille: { from: null, confirmed: false, source: 'pris ej hämtat än' },
+      molnlycke: { from: null, confirmed: false, source: 'pris ej hämtat än' },
+    },
+  },
+];
+
+/**
+ * Partille, ordinarie priser för färgbehandlingar (Bokadirekt). Kept here as the
+ * record of what was quoted; the site links to Bokadirekt rather than listing all
+ * of them, since the list would bloat the card and go stale.
+ */
+export const partilleColourPrices = [
+  { name: 'Färg (kort–medel)', from: 999 },
+  { name: 'Färg (medel–långt)', from: 1299 },
+  { name: 'Slingor (kort–medel)', from: 1250 },
+  { name: 'Slingor (medel–långt)', from: 1650 },
+  { name: 'Balayage (kort–medel)', from: 1250 },
+  { name: 'Balayage (medel–långt)', from: 1650 },
+  { name: 'Färg & klippning (kort–medel)', from: 1399 },
+  { name: 'Slingor & klippning (medel–långt)', from: 1999 },
+  { name: 'Balayage & klippning', from: 1599 },
+  { name: 'Permanent & klippning', from: 1699 },
+] as const;
+
+/** 999 → "från 999 kr", 1650 → "från 1 650 kr". */
+export const formatFrom = (amount: number) =>
+  `från ${new Intl.NumberFormat('sv-SE').format(amount)} kr`;
+
 export type Review = {
   quote: string;
   name: string;
